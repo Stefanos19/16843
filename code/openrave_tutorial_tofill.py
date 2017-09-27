@@ -10,7 +10,7 @@ import numpy as np
 import scipy
 
 # OpenRAVE
-import openravepy
+import 	openravepy
 #openravepy.RaveInitialize(True, openravepy.DebugLevel.Debug)
 
 
@@ -31,18 +31,28 @@ if ordata_path_thispack not in openrave_data_paths:
 
 class RoboHandler:
   def __init__(self):
-    pass 
-    
+    self.env = openravepy.Environment()
+    self.env.SetViewer('qtcoin') 
+    self.env.GetViewer().SetName('tutorial viewer')
+    self.env.Load('models/%s.env.xml' % (PACKAGE_NAME) )
+    self.robot = self.env.GetRobots()[0]
 
   #remove all the time.sleep(0) statements! Those are just there so the code can run before you fill in the functions
 
   # move in a straight line, depending on which direction the robot is facing
   def move_straight(self, dist):
-    pass
+    with (self.env):
+      t = self.robot.GetTransform()
+      direction = t[0:3,0]
+      t[0:3,3] += dist*direction
+      self.robot.SetTransform(t)
 
   # rotate the robot about the z-axis by the specified angle (in radians)
   def rotate_by(self, ang):
-    pass
+    with (self.env):
+      t = self.robot.GetTransform()
+      t[:3,:3] = np.dot(openravepy.matrixFromAxisAngle([0,0,ang])[:3,:3],t[:3,:3])
+      self.robot.SetTransform(t)
 
   # go to each of the square corners, point towards the center, and snap a photo!
   def go_around_square(self):
